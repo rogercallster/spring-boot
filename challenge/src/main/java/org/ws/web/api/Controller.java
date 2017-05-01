@@ -23,8 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.ws.db.DBOperation;
-import org.ws.web.model.User;
+import org.ws.web.db.DAO;
+import org.ws.web.db.services.DBServices;
+import org.ws.web.db.services.DBServicesImplementation;
+import org.ws.web.model.Tweet;
+import org.ws.web.model.Person;
 
 import com.fasterxml.jackson.databind.deser.impl.BeanPropertyMap;
 
@@ -33,15 +36,16 @@ public class Controller {
 	
 	
 	@Autowired
-	DBOperation dbo;
+	DBServicesImplementation dbServices;
 
 	@RequestMapping(value = "/api/message", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Map<String, String>> getMessages() {
+	public ResponseEntity<List<Object>> getMessages(@AuthenticationPrincipal UserDetails currentUser) {
 		
 		
-		List<Object> map = dbo.query("");
+		List<Object> list = dbServices.readMessage(currentUser.getUsername());
+		//list.add(new Messages("Hello", 1));
 		Map<String, String> messageMap = retriveMessages();
-		return new ResponseEntity<Map<String, String>>(messageMap,
+		return new ResponseEntity<List<Object>>(list,
 				HttpStatus.OK);
 	}
 
@@ -59,17 +63,17 @@ public class Controller {
 	}
 
 	@RequestMapping(value = "/api/user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<User>> getListOfPeopleUserFollows() {
-		User user = new User();
-		List<User> list = new ArrayList<User>();
+	public ResponseEntity<List<Person>> getListOfPeopleUserFollows() {
+		Person user = new Person();
+		List<Person> list = new ArrayList<Person>();
 		list.add(user);
-		return new ResponseEntity<List<User>>(list, HttpStatus.OK);
+		return new ResponseEntity<List<Person>>(list, HttpStatus.OK);
 	}
 
 	// http://MSANIT1021969.corp.service-now.com:8080//api/user/update //{"id" :
 	// "1","name" :"topUser "}
 	@RequestMapping(value = "/api/user/update", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> follow(@RequestBody User user,
+	public ResponseEntity<Boolean> follow(@RequestBody Person user,
 			@AuthenticationPrincipal UserDetails currentUser) {
 
 		boolean sucess = false;
@@ -84,7 +88,7 @@ public class Controller {
 		return new ResponseEntity<Boolean>(HttpStatus.NO_CONTENT);
 	}
 
-	private Boolean updateFollowingList(String currentUser, User user) {
+	private Boolean updateFollowingList(String currentUser, Person user) {
 		return true;
 		// TODO Auto-generated method stub
 

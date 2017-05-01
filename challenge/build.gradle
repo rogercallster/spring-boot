@@ -28,13 +28,10 @@ repositories {
 
 
 dependencies {
-	compile ("commons-dbcp:commons-dbcp")
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-	compile("org.springframework:spring-jdbc")
-    compile("com.h2database:h2")
+	compile('org.springframework.boot:spring-boot-starter-jdbc')
+	compile ("commons-dbcp:commons-dbcp")	
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
-	
 	runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('com.h2database:h2')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
