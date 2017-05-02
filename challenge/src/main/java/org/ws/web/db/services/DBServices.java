@@ -7,12 +7,14 @@ import org.ws.web.model.Person;
 
 public interface DBServices {
 	
-	public List<Object> readMessage(String string);
 
-	public List<Person> getListOfFollowersAndFollows(Person user);
 
 	public boolean follow(Person currentUser, Person newUser);
 
 	public boolean unfollow(Person currentUser, Person newUser);
+
+	public List<Person> getFollowingAndFollower(int userId);
+
+	public List<Tweet> readTweets(int userId);
 
 }

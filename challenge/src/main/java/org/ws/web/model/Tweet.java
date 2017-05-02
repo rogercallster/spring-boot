@@ -4,24 +4,27 @@ public class Tweet {
 
 	private String message;
 	private int id;
-	private int personId;
+	 
 	
-	
-	
-	public int getPersonId() {
-		return personId;
-	}
-
-	public void setPersonId(int personId) {
-		this.personId = personId;
-	}
-
-	public Tweet(String message, int id, int personId) {
+	public Tweet(String message, int id, int personId, String name) {
 		super();
 		this.message = message;
 		this.id = id;
-		this.personId = personId;
+		this.person = new Person(personId, name);
+		
+		
 	}
+	
+	public Person getPerson() {
+		return person;
+	}
+
+	public void setPerson(Person person) {
+		this.person = person;
+	}
+	private Person person;
+
+	
 	
 	public String getMessage() {
 		return message;
