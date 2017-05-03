@@ -28,6 +28,15 @@ repositories {
 
 
 dependencies {
+	// JAX-RS 2.0(.1)
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+ 
+     // Jersey 2.15
+    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.15'
+ 
+    s// Servlet 3
+    compile 'javax.servlet:javax.servlet-api:3.1.0'
+        
 	compile('org.springframework.boot:spring-boot-starter-jdbc')
 	compile ("commons-dbcp:commons-dbcp")	
 	compile('org.springframework.boot:spring-boot-starter-security')

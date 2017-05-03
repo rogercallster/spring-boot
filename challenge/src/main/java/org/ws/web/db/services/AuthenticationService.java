@@ -16,19 +16,18 @@ import org.ws.web.model.Person;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
+	
 	@Autowired
 	private DAO userDAO;
+
 	@Override
-	public UserDetails loadUserByUsername(String username)
-			throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Person userInfo = userDAO.getUser(username);
 		GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
 		String name = userInfo.getName();
 		ShaPasswordEncoder encoder = new ShaPasswordEncoder();
-		
-		
-		UserDetails userDetails = new User(name, 
-				encoder.encodePassword("123", null), Arrays.asList(authority));
+
+		UserDetails userDetails = new User(name, encoder.encodePassword("123", null), Arrays.asList(authority));
 		return userDetails;
 	}
-} 
+}
