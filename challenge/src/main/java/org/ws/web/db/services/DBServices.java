@@ -2,17 +2,17 @@ package org.ws.web.db.services;
 
 import java.util.List;
 
-import org.ws.web.model.Tweet;
 import org.ws.web.model.Person;
+import org.ws.web.model.Tweet;
 
 public interface DBServices {
 
-	public boolean follow(int currentUser, int newUser);
+	public List<Person> getFollowingAndFollower(String user);
 
-	public boolean unfollow(int currentUser, int newUser);
+	public boolean unfollow(int userToUnfollow, String currentUser);
 
-	public List<Person> getFollowingAndFollower(int userId);
+	public boolean follow(int userToBeFollowed, String currentUser);
 
-	public List<Tweet> readTweets(int userId, String searchFilters);
+	public List<Tweet> readTweets(String currentUser, String keyword);
 
 }

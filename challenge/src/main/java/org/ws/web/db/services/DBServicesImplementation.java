@@ -7,33 +7,37 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.ws.web.db.DAO;
+import org.ws.web.db.DAOImplementation;
 import org.ws.web.model.Person;
 import org.ws.web.model.Tweet;
+
+/**
+ * This class have all the services business logic
+ * */
 
 @Service
 public class DBServicesImplementation implements DBServices {
 
 	@Autowired
-	DAO dao;
+	DAOImplementation dao;
 
-	public DBServicesImplementation(final DAO dbo) {
+	public DBServicesImplementation(final DAOImplementation dbo) {
 		this.dao = dbo;
 	}
 
-	@Override
-	public List<Tweet> readTweets(int userId, String keyword) {
-		List<Integer> persons = dao.getFollowing(userId);
-		persons.add(userId);
-		return dao.getTweets(persons, keyword );
-
-	}
-
-
+	/**
+	 * 
+	 * This method is responsible for getting all the tweets from current user and all the f
+	 * 
+	 * 
+	 * */
 
 	@Override
-	public boolean unfollow(int userId, int id) {
-		return dao.delete(userId, id);
+	public List<Tweet> readTweets(String currentUser, String keyword) {
+		int id = getUserDetails(currentUser).getId();
+		List<Integer> persons = dao.getFollowing(id);
+		persons.add(id);
+		return dao.getTweets(persons, keyword);
 
 	}
 
@@ -42,18 +46,28 @@ public class DBServicesImplementation implements DBServices {
 	}
 
 	@Override
-	public List<Person> getFollowingAndFollower(int userId) {
-		List<Person> list = dao.queryFollowAndFollowerRecords(userId);
+	public List<Person> getFollowingAndFollower(String user) {
+		int id = getUserDetails(user).getId();
+		;
+		List<Person> list = dao.queryFollowAndFollowerRecords(id);
 		return list;
 	}
 
-	public int getDistance(int src, int dst) {
+	/**
+	 * this method finds shortest distance between source and Destination.
+	 * 
+	 * 
+	 * */
+	public int getDistance(String currentUser, int dst) {
+		int src = getUserDetails(currentUser).getId();
+
 		// If out range if src or dst is zero or negative
 		if (src <= 0 || dst <= 0)
 			return Integer.MAX_VALUE;
 
 		Map<Integer, Integer> visited = new HashMap<Integer, Integer>();
 		List<Integer> queue = new ArrayList<>();
+
 		queue.add(src);
 		int current = src;
 		visited.put(src, 0);
@@ -62,32 +76,43 @@ public class DBServicesImplementation implements DBServices {
 			current = queue.get(0);
 			queue.remove(0);
 
-			List<Integer> list = dao.getFollowing(current);
+			List<Integer> followingList = dao.getFollowing(current);
 
-			for (int i : list) {
+			for (int tempId : followingList) {
 
-				if (visited.get(i) == null) {
-					visited.put(i, visited.get(current) + 1);
+				if (visited.get(tempId) == null) {
+					visited.put(tempId, visited.get(current) + 1);
 				} else {
-					if (visited.get(i) > visited.get(current) + 1)
-						visited.put(i, visited.get(current) + 1);
+					if (visited.get(tempId) > visited.get(current) + 1)
+						visited.put(tempId, visited.get(current) + 1);
 				}
-				if (i != dst && i != src) {
+				if (tempId != dst && tempId != src) {
 					if (visited.get(dst) != null && visited.get(current) + 1 >= visited.get(dst))
 						continue;
-					queue.add(i);
+					queue.add(tempId);
 				}
-
 			}
 		}
 
 		return visited.get(dst);
 	}
+
+	// going for two db query because http://localhost:8080/h2-console is no more working with 404 error. Some bean
+	// setting to be fixed
 	@Override
-	public boolean follow(int id, int username) {
-		//going for two db query because http://localhost:8080/h2-console is no more working.
-		unfollow(id, username);
-		return dao.insert(id, username);
+	public boolean follow(int userToBeFollowed, String currentUser) {
+
+		int currentUserId = getUserDetails(currentUser).getId();
+		// make sure call is idempotent
+		unfollow(userToBeFollowed, currentUser);
+		return dao.insert(userToBeFollowed, currentUserId);
+	}
+
+	@Override
+	public boolean unfollow(int userId, String currentUser) {
+		int id = getUserDetails(currentUser).getId();
+		return dao.delete(userId, id);
+
 	}
 
 }

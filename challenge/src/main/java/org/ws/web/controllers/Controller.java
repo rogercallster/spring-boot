@@ -29,9 +29,9 @@ import org.ws.web.model.Tweet;
  * 
  * GET:
  * 
- * 1) getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> 
- * 2) getListOfPeopleUserFollows USAGE http://<HOST:PORT>/api/followers_and_following 
- * 5) getShortestDistance USAGE  http://<HOST:PORT>/api/shortest_distance_to/{user}
+ * 1) getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> 2) getListOfPeopleUserFollows USAGE
+ * http://<HOST:PORT>/api/followers_and_following 5) getShortestDistance USAGE
+ * http://<HOST:PORT>/api/shortest_distance_to/{user}
  * 
  * PUT: follow USAGE http://<HOST:PORT>/api/user/follow {"id" : "7" , <other optional details>}
  * 
@@ -45,12 +45,10 @@ public class Controller {
 	DBServicesImplementation dbServices;
 
 	/**
-	 * @GET
-	 *  getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> e.g.
-	 * localhost:8080/api/messages?search=dolor dapibus gravida 
-	 * will get back with response as :
-	 * [{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc ac"
-	 * ,"id":104,"person":{"id":1,"name":"Rigel Young"}}] *?
+	 * @GET getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> e.g.
+	 *      localhost:8080/api/messages?search=dolor dapibus gravida will get back with response as :
+	 *      [{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc ac"
+	 *      ,"id":104,"person":{"id":1,"name":"Rigel Young"}}] *?
 	 * 
 	 * @param currentUser
 	 * @param searchFilter
@@ -60,9 +58,7 @@ public class Controller {
 	public ResponseEntity<List<Tweet>> getMessages(@AuthenticationPrincipal UserDetails currentUser,
 			@RequestParam(value = "search", required = false) String searchFilter) {
 
-		int userId = dbServices.getUserDetails(currentUser.getUsername()).getId();
-
-		List<Tweet> tweets = dbServices.readTweets(userId, searchFilter);
+		List<Tweet> tweets = dbServices.readTweets(currentUser.getUsername(), searchFilter);
 		return new ResponseEntity<>(tweets, HttpStatus.OK);
 	}
 
@@ -72,13 +68,12 @@ public class Controller {
 	 * 
 	 * 
 	 * @param currentUser
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping(value = "/api/followers_and_following", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Person>> getListOfPeopleUserFollows(@AuthenticationPrincipal UserDetails currentUser) {
 
-		int userId = dbServices.getUserDetails(currentUser.getUsername()).getId();
-		List<Person> users = dbServices.getFollowingAndFollower(userId);
+		List<Person> users = dbServices.getFollowingAndFollower(currentUser.getUsername());
 		return new ResponseEntity<>(users, HttpStatus.OK);
 
 	}
@@ -86,20 +81,15 @@ public class Controller {
 	/**
 	 * @PUT : Idempotent
 	 * 
-	 * 
-	 * 
 	 * @param id
 	 * @param currentUser
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping(value = "/api/user/follow", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> follow(@RequestBody String id, @AuthenticationPrincipal UserDetails currentUser) {
 
-		JSONObject json = new JSONObject(id);
-		id = json.getString("id");
 		boolean sucess = false;
-		int userId = dbServices.getUserDetails(currentUser.getUsername()).getId();
-		sucess = dbServices.follow(Integer.parseInt(id), userId);
+		sucess = dbServices.follow(getId(id), currentUser.getUsername());
 		return new ResponseEntity<Boolean>(sucess, HttpStatus.CREATED);
 	}
 
@@ -109,14 +99,13 @@ public class Controller {
 	 * 
 	 * 
 	 * @param currentUser
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping(value = "/api/follower/unfollow/{id}", method = RequestMethod.DELETE, consumes = MediaType.ALL_VALUE)
 	public ResponseEntity<Boolean> unfollowByID(@AuthenticationPrincipal UserDetails currentUser,
 			@PathVariable("id") String id) {
 
-		int userId = dbServices.getUserDetails(currentUser.getUsername()).getId();
-		dbServices.unfollow(Integer.parseInt(id), userId);
+		dbServices.unfollow(Integer.parseInt(id), currentUser.getUsername());
 		return new ResponseEntity<Boolean>(HttpStatus.NO_CONTENT);
 	}
 
@@ -127,15 +116,19 @@ public class Controller {
 	 * 
 	 * @param source
 	 * @param destination
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping(value = "/api/shortest_distance_to/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> getShortestDistance(@AuthenticationPrincipal UserDetails source,
 			@PathVariable("userId") String destination) {
 
-		int src = dbServices.getUserDetails(source.getUsername()).getId();
-		int distance = dbServices.getDistance(src, Integer.valueOf(destination));
+		int distance = dbServices.getDistance(source.getUsername(), Integer.valueOf(destination));
 		return new ResponseEntity<>(distance, HttpStatus.OK);
 	}
 
+	private int getId(String id) {
+		JSONObject json = new JSONObject(id);
+		id = json.getString("id");
+		return Integer.parseInt(id);
+	}
 }

@@ -11,14 +11,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.ws.web.db.DAO;
+import org.ws.web.db.DAOImplementation;
 import org.ws.web.model.Person;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
 	
 	@Autowired
-	private DAO userDAO;
+	private DAOImplementation userDAO;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
