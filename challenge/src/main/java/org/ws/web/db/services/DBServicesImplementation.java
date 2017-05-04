@@ -49,7 +49,7 @@ public class DBServicesImplementation implements DBServices {
 	public List<Person> getFollowingAndFollower(String user) {
 		int id = getUserDetails(user).getId();
 		;
-		List<Person> list = dao.queryFollowAndFollowerRecords(id); 
+		List<Person> list = dao.queryFollowAndFollowerRecords(id);
 		return list;
 	}
 
@@ -59,43 +59,46 @@ public class DBServicesImplementation implements DBServices {
 	public int getDistance(String currentUser, int destination) {
 
 		int source = getUserDetails(currentUser).getId();
+
 		if (!(isValidPerson(destination) && isValidPerson(source)))
 			return Integer.MAX_VALUE;
+		
 		// initialize lookup distance map
-		Map<Integer, Integer> visited = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> visitedDistance = new HashMap<Integer, Integer>();
+
 		// initialize iteration queue
 		List<Integer> queue = new ArrayList<>();
 
-		// add source to queue as first element to start iterate over adjacency list
+		// add source to queue as first element to start iterate process over adjacency list
 		queue.add(source);
-		int current = source;
+		int currentNode = source;
 
 		// set distance from source to source = 0 as baseline
-		visited.put(source, 0);
+		visitedDistance.put(source, 0);
 
 		while (queue.size() > 0) {
-			current = queue.get(0);
+			currentNode = queue.get(0);
 			queue.remove(0);
 
-			List<Integer> followingList = dao.getFollowing(current);
+			List<Integer> followingList = dao.getFollowing(currentNode);
 
-			for (int tempId : followingList) {
+			for (int tempNextNode : followingList) {
 
-				if (visited.get(tempId) == null) {
-					visited.put(tempId, visited.get(current) + 1);
-				} else {
-					if (visited.get(tempId) > visited.get(current) + 1)
-						visited.put(tempId, visited.get(current) + 1);
-				}
-				if (tempId != destination && tempId != source) {
-					if (visited.get(destination) != null && visited.get(current) + 1 >= visited.get(destination))
-						continue;
-					queue.add(tempId);
+				if (visitedDistance.get(tempNextNode) == null) {
+					visitedDistance.put(tempNextNode, visitedDistance.get(currentNode) + 1);
+					if (tempNextNode != source || tempNextNode != destination)
+						queue.add(tempNextNode);
+
+				} else if (visitedDistance.get(tempNextNode) > visitedDistance.get(currentNode)+1) {
+					visitedDistance.put(tempNextNode, visitedDistance.get(currentNode) + 1);
+					if (tempNextNode != source || tempNextNode != destination)
+						queue.add(tempNextNode);
 				}
 			}
+
 		}
 
-		return visited.get(destination) != null ? visited.get(destination) : Integer.MAX_VALUE;
+		return visitedDistance.get(destination) != null ? visitedDistance.get(destination) : Integer.MAX_VALUE;
 	}
 
 	public boolean isValidPerson(int dst) {
