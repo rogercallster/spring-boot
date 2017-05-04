@@ -14,18 +14,23 @@ import org.ws.web.model.Tweet;
 
 @Component
 @Repository
-public class DAOImplementation implements IDAO {
+public class DAOImplementation implements DAO {
 
-	private NamedParameterJdbcTemplate jdbc;
+	private static final String ID = "id";
+	private static final String NAME = "name";
+	private static final String CONTENT = "content";
+	private static final String PERSON_ID = "person_id";
+	
+	private NamedParameterJdbcTemplate fJDBC;
 
 	public DAOImplementation(final NamedParameterJdbcTemplate jdbc) {
-		this.jdbc = jdbc;
+		this.fJDBC = jdbc;
 	}
 	
 	
 	@Transactional(readOnly = true)
 	private List<Person> getPersonList(String sql) {
-		List<Person> list = jdbc.query(sql, (rs, rowNum) -> new Person(rs.getInt("id"), rs.getString("name")));
+		List<Person> list = fJDBC.query(sql, (rs, rowNum) -> new Person(rs.getInt(ID), rs.getString(NAME)));
 		if (list == null)
 			list = new ArrayList<Person>();
 		return list;
@@ -44,10 +49,10 @@ public class DAOImplementation implements IDAO {
 		String sql = "SELECT tweet.*,person.name " + "FROM tweet " + "INNER JOIN person "
 				+ "ON person.id=tweet.person_id " + "WHERE person.id IN (" + users + ")  " + searchFilter;
 
-		return jdbc.query(
+		return fJDBC.query(
 				sql,
-				(rs, rowNum) -> new Tweet(rs.getString("content"), rs.getInt("id"), rs.getInt("person_id"), rs
-						.getString("name")));
+				(rs, rowNum) -> new Tweet(rs.getString(CONTENT), rs.getInt(ID), rs.getInt(PERSON_ID), rs
+						.getString(NAME)));
 	}
 	
 	@Override
@@ -73,7 +78,7 @@ public class DAOImplementation implements IDAO {
 				+ " UNION " + " SELECT  DISTINCT  person.* " + " FROM followers " + " INNER JOIN person  "
 				+ " ON followers.follower_person_id = person.id " + " WHERE followers.person_id  = '" + id + "'";
 
-		List<Person> list = jdbc.query(sql, (rs, rowNum) -> new Person(rs.getInt("id"), rs.getString("name")));
+		List<Person> list = fJDBC.query(sql, (rs, rowNum) -> new Person(rs.getInt(ID), rs.getString(NAME)));
 
 		return list;
 	}
@@ -86,7 +91,7 @@ public class DAOImplementation implements IDAO {
 				+ " ON followers.person_id = person.id " + " WHERE followers.follower_person_id  = '" + id
 				+ "' order by person.id ";
 		
-		List<Integer> followers = jdbc.query(sql, (rs, rowNum) -> new Integer(rs.getInt("id")));
+		List<Integer> followers = fJDBC.query(sql, (rs, rowNum) -> new Integer(rs.getInt(ID)));
 		
 		if (followers == null)
 			followers = new ArrayList<Integer>();
@@ -100,7 +105,7 @@ public class DAOImplementation implements IDAO {
 
 		String sql = "DELETE FROM followers where person_id = " + userId + "AND follower_person_id = " + id;
 		SqlParameterSource namedParameters = new MapSqlParameterSource();
-		int value = jdbc.update(sql, namedParameters);
+		int value = fJDBC.update(sql, namedParameters);
 
 		return id == value;
 	}
@@ -112,8 +117,15 @@ public class DAOImplementation implements IDAO {
 		String sql = "INSERT  into followers (person_id, follower_person_id)  values (" + userId + "," + currentuser
 				+ ")";
 		SqlParameterSource namedParameters = new MapSqlParameterSource();
-		int value = jdbc.update(sql, namedParameters);
+		int value = fJDBC.update(sql, namedParameters);
 		
 		return currentuser == value;
+	}
+
+
+	public List<Person> queryPerson(int dst) {
+		String sql = "SELECT * FROM person WHERE id='"+ dst +"'";
+		List<Person> list = fJDBC.query(sql, (rs, rowNum) -> new Person(rs.getInt(ID), rs.getString(NAME)));
+		return list;
 	}
 }

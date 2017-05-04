@@ -27,7 +27,7 @@ public class DBServicesImplementation implements DBServices {
 
 	/**
 	 * 
-	 * This method is responsible for getting all the tweets from current user and all the f
+	 * This method is responsible for getting all the tweet from current user and all the followers
 	 * 
 	 * 
 	 * */
@@ -49,28 +49,29 @@ public class DBServicesImplementation implements DBServices {
 	public List<Person> getFollowingAndFollower(String user) {
 		int id = getUserDetails(user).getId();
 		;
-		List<Person> list = dao.queryFollowAndFollowerRecords(id);
+		List<Person> list = dao.queryFollowAndFollowerRecords(id); 
 		return list;
 	}
 
 	/**
-	 * this method finds shortest distance between source and Destination.
-	 * 
-	 * 
+	 * this method finds shortest distance between source and destination.
 	 * */
-	public int getDistance(String currentUser, int dst) {
-		int src = getUserDetails(currentUser).getId();
+	public int getDistance(String currentUser, int destination) {
 
-		// If out range if src or dst is zero or negative
-		if (src <= 0 || dst <= 0)
+		int source = getUserDetails(currentUser).getId();
+		if (!(isValidPerson(destination) && isValidPerson(source)))
 			return Integer.MAX_VALUE;
-
+		// initialize lookup distance map
 		Map<Integer, Integer> visited = new HashMap<Integer, Integer>();
+		// initialize iteration queue
 		List<Integer> queue = new ArrayList<>();
 
-		queue.add(src);
-		int current = src;
-		visited.put(src, 0);
+		// add source to queue as first element to start iterate over adjacency list
+		queue.add(source);
+		int current = source;
+
+		// set distance from source to source = 0 as baseline
+		visited.put(source, 0);
 
 		while (queue.size() > 0) {
 			current = queue.get(0);
@@ -86,19 +87,26 @@ public class DBServicesImplementation implements DBServices {
 					if (visited.get(tempId) > visited.get(current) + 1)
 						visited.put(tempId, visited.get(current) + 1);
 				}
-				if (tempId != dst && tempId != src) {
-					if (visited.get(dst) != null && visited.get(current) + 1 >= visited.get(dst))
+				if (tempId != destination && tempId != source) {
+					if (visited.get(destination) != null && visited.get(current) + 1 >= visited.get(destination))
 						continue;
 					queue.add(tempId);
 				}
 			}
 		}
 
-		return visited.get(dst);
+		return visited.get(destination) != null ? visited.get(destination) : Integer.MAX_VALUE;
 	}
 
-	// going for two db query because http://localhost:8080/h2-console is no more working with 404 error. Some bean
-	// setting to be fixed
+	public boolean isValidPerson(int dst) {
+		List<Person> list = dao.queryPerson(dst);
+		return list != null && list.size() == 1;
+	}
+
+	/**
+	 * Note: Needed two db query because http://localhost:8080/h2-console is no more working with 404 error.
+	 */
+
 	@Override
 	public boolean follow(int userToBeFollowed, String currentUser) {
 

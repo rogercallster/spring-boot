@@ -8,12 +8,13 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.ws.web.db.services.AuthenticationService;
+import org.ws.web.db.services.authentication.AuthenticationService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
+	private static final String H2_CONSOLE = "/h2-console/*";
+	private static final String LOGIN = "/login";
 	@Autowired
 	Environment env;
 	@Autowired
@@ -24,8 +25,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().anyRequest().fullyAuthenticated();
 		http.httpBasic();
 		http.csrf().disable();
-		http.authorizeRequests().antMatchers("/h2-console/*").permitAll().anyRequest().authenticated().and()
-				.formLogin().loginPage("/login").permitAll().and().logout().permitAll();
+		http.authorizeRequests().antMatchers(H2_CONSOLE).permitAll().anyRequest().authenticated().and()
+				.formLogin().loginPage(LOGIN).permitAll().and().logout().permitAll();
 		http.headers().frameOptions().disable();
 	}
 

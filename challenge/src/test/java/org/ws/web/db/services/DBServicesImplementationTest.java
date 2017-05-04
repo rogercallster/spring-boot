@@ -17,7 +17,7 @@ import org.ws.web.model.Person;
 public class DBServicesImplementationTest {
 
 	String RESULT_DISTANCE = "";
-	private static String REAL_DISTANCE_MAP = "i=0 j=0 distance=2147483647    i=0 j=1 distance=2147483647    i=0 j=2 distance=2147483647    i=0 j=3 distance=2147483647    i=0 j=4 distance=2147483647    i=0 j=5 distance=2147483647    i=0 j=6 distance=2147483647    i=0 j=7 distance=2147483647    i=0 j=8 distance=2147483647    i=0 j=9 distance=2147483647    i=0 j=10 distance=2147483647    i=1 j=0 distance=2147483647    i=1 j=1 distance=0    i=1 j=2 distance=1    i=1 j=3 distance=2    i=1 j=4 distance=1    i=1 j=5 distance=1    i=1 j=6 distance=2    i=1 j=7 distance=2    i=1 j=8 distance=1    i=1 j=9 distance=2    i=1 j=10 distance=1    i=2 j=0 distance=2147483647    i=2 j=1 distance=2    i=2 j=2 distance=0    i=2 j=3 distance=2    i=2 j=4 distance=2    i=2 j=5 distance=2    i=2 j=6 distance=1    i=2 j=7 distance=1    i=2 j=8 distance=2    i=2 j=9 distance=2    i=2 j=10 distance=1    i=3 j=0 distance=2147483647    i=3 j=1 distance=1    i=3 j=2 distance=2    i=3 j=3 distance=0    i=3 j=4 distance=2    i=3 j=5 distance=1    i=3 j=6 distance=1    i=3 j=7 distance=1    i=3 j=8 distance=1    i=3 j=9 distance=1    i=3 j=10 distance=2    i=4 j=0 distance=2147483647    i=4 j=1 distance=2    i=4 j=2 distance=1    i=4 j=3 distance=1    i=4 j=4 distance=0    i=4 j=5 distance=2    i=4 j=6 distance=1    i=4 j=7 distance=1    i=4 j=8 distance=1    i=4 j=9 distance=1    i=4 j=10 distance=2    i=5 j=0 distance=2147483647    i=5 j=1 distance=1    i=5 j=2 distance=2    i=5 j=3 distance=1    i=5 j=4 distance=1    i=5 j=5 distance=0    i=5 j=6 distance=2    i=5 j=7 distance=1    i=5 j=8 distance=1    i=5 j=9 distance=2    i=5 j=10 distance=2    i=6 j=0 distance=2147483647    i=6 j=1 distance=1    i=6 j=2 distance=1    i=6 j=3 distance=2    i=6 j=4 distance=1    i=6 j=5 distance=1    i=6 j=6 distance=0    i=6 j=7 distance=1    i=6 j=8 distance=1    i=6 j=9 distance=1    i=6 j=10 distance=1    i=7 j=0 distance=2147483647    i=7 j=1 distance=2    i=7 j=2 distance=1    i=7 j=3 distance=1    i=7 j=4 distance=1    i=7 j=5 distance=1    i=7 j=6 distance=1    i=7 j=7 distance=0    i=7 j=8 distance=2    i=7 j=9 distance=1    i=7 j=10 distance=2    i=8 j=0 distance=2147483647    i=8 j=1 distance=1    i=8 j=2 distance=1    i=8 j=3 distance=2    i=8 j=4 distance=2    i=8 j=5 distance=2    i=8 j=6 distance=2    i=8 j=7 distance=1    i=8 j=8 distance=0    i=8 j=9 distance=2    i=8 j=10 distance=1    i=9 j=0 distance=2147483647    i=9 j=1 distance=1    i=9 j=2 distance=1    i=9 j=3 distance=1    i=9 j=4 distance=1    i=9 j=5 distance=1    i=9 j=6 distance=1    i=9 j=7 distance=2    i=9 j=8 distance=2    i=9 j=9 distance=0    i=9 j=10 distance=1    ";
+	private static final String REAL_DISTANCE_MAP = "i=0 j=0 distance=2147483647    i=0 j=1 distance=2147483647    i=0 j=2 distance=2147483647    i=0 j=3 distance=2147483647    i=0 j=4 distance=2147483647    i=0 j=5 distance=2147483647    i=0 j=6 distance=2147483647    i=0 j=7 distance=2147483647    i=0 j=8 distance=2147483647    i=0 j=9 distance=2147483647    i=0 j=10 distance=2147483647    i=1 j=0 distance=2147483647    i=1 j=1 distance=0    i=1 j=2 distance=1    i=1 j=3 distance=2    i=1 j=4 distance=1    i=1 j=5 distance=1    i=1 j=6 distance=2    i=1 j=7 distance=2    i=1 j=8 distance=1    i=1 j=9 distance=2    i=1 j=10 distance=1    i=2 j=0 distance=2147483647    i=2 j=1 distance=2    i=2 j=2 distance=0    i=2 j=3 distance=2    i=2 j=4 distance=2    i=2 j=5 distance=2    i=2 j=6 distance=1    i=2 j=7 distance=1    i=2 j=8 distance=2    i=2 j=9 distance=2    i=2 j=10 distance=1    i=3 j=0 distance=2147483647    i=3 j=1 distance=1    i=3 j=2 distance=2    i=3 j=3 distance=0    i=3 j=4 distance=2    i=3 j=5 distance=1    i=3 j=6 distance=1    i=3 j=7 distance=1    i=3 j=8 distance=1    i=3 j=9 distance=1    i=3 j=10 distance=2    i=4 j=0 distance=2147483647    i=4 j=1 distance=2    i=4 j=2 distance=1    i=4 j=3 distance=1    i=4 j=4 distance=0    i=4 j=5 distance=2    i=4 j=6 distance=1    i=4 j=7 distance=1    i=4 j=8 distance=1    i=4 j=9 distance=1    i=4 j=10 distance=2    i=5 j=0 distance=2147483647    i=5 j=1 distance=1    i=5 j=2 distance=2    i=5 j=3 distance=1    i=5 j=4 distance=1    i=5 j=5 distance=0    i=5 j=6 distance=2    i=5 j=7 distance=1    i=5 j=8 distance=1    i=5 j=9 distance=2    i=5 j=10 distance=2    i=6 j=0 distance=2147483647    i=6 j=1 distance=1    i=6 j=2 distance=1    i=6 j=3 distance=2    i=6 j=4 distance=1    i=6 j=5 distance=1    i=6 j=6 distance=0    i=6 j=7 distance=1    i=6 j=8 distance=1    i=6 j=9 distance=1    i=6 j=10 distance=1    i=7 j=0 distance=2147483647    i=7 j=1 distance=2    i=7 j=2 distance=1    i=7 j=3 distance=1    i=7 j=4 distance=1    i=7 j=5 distance=1    i=7 j=6 distance=1    i=7 j=7 distance=0    i=7 j=8 distance=2    i=7 j=9 distance=1    i=7 j=10 distance=2    i=8 j=0 distance=2147483647    i=8 j=1 distance=1    i=8 j=2 distance=1    i=8 j=3 distance=2    i=8 j=4 distance=2    i=8 j=5 distance=2    i=8 j=6 distance=2    i=8 j=7 distance=1    i=8 j=8 distance=0    i=8 j=9 distance=2    i=8 j=10 distance=1    i=9 j=0 distance=2147483647    i=9 j=1 distance=1    i=9 j=2 distance=1    i=9 j=3 distance=1    i=9 j=4 distance=1    i=9 j=5 distance=1    i=9 j=6 distance=1    i=9 j=7 distance=2    i=9 j=8 distance=2    i=9 j=9 distance=0    i=9 j=10 distance=1    ";
 
 	@Test
 	public void shortedDistanceTest() {
@@ -27,13 +27,13 @@ public class DBServicesImplementationTest {
 		DBServicesImplementation dbServices = new DBServicesImplementation(dao);
 
 		String[] lookup = mockDB(dao);
-		
+
 		String distance = "";
 		for (int i = 0; i < lookup.length; i++) {
 			for (int j = 0; j <= lookup.length; j++) {
 				String src = lookup[i].trim();
 				int dst = j;
-				distance += "i=" + (i ) + " j=" + (j) + " distance=" + dbServices.getDistance(src, dst) + "    ";
+				distance += "i=" + (i) + " j=" + (j) + " distance=" + dbServices.getDistance(src, dst) + "    ";
 			}
 		}
 		assertEquals("Expected value to be equal to REAL_DISTANCE_MAP but was : " + distance + "\n", distance.trim(),
@@ -62,13 +62,22 @@ public class DBServicesImplementationTest {
 		List<Integer> list10 = Arrays.asList(new Integer[] { 4, 1, 8, 5, 7 });
 		when(dao.getFollowing(10)).thenReturn(list10);
 
-		String[] lookup = {("Rigel Young"),("Ignatius Salinas"),("Noble Walsh"),("Eagan Perry"),("Ella Mullen"),("Guinevere Lindsey"),("Xandra Christensen"),("Judith Woodard"),("Emma Arnold"),("Vanna Noel")};
+		when(dao.queryPerson(0)).thenReturn(null);
+		when(dao.queryPerson(11)).thenReturn(null);
+
+		List<Person> onePerson = new ArrayList<>();
+		onePerson.add(new Person(1, ""));
+
+		String[] lookup = { ("Rigel Young"), ("Ignatius Salinas"), ("Noble Walsh"), ("Eagan Perry"), ("Ella Mullen"),
+				("Guinevere Lindsey"), ("Xandra Christensen"), ("Judith Woodard"), ("Emma Arnold"), ("Vanna Noel") };
 		List<Person> idLookup = new ArrayList<Person>();
-		
-		for(int i=0; i<   lookup.length; i++){
+
+		for (int i = 0; i < lookup.length; i++) {
 			idLookup.add(new Person(i, lookup[i]));
 			when(dao.getUser(lookup[i])).thenReturn(idLookup.get(i));
+			when(dao.queryPerson(i + 1)).thenReturn(onePerson);
 		}
+
 		return lookup;
 	}
 

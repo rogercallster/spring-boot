@@ -46,9 +46,11 @@ public class Controller {
 
 	/**
 	 * @GET getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> e.g.
-	 *      localhost:8080/api/messages?search=dolor dapibus gravida will get back with response as :
-	 *      [{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc ac"
-	 *      ,"id":104,"person":{"id":1,"name":"Rigel Young"}}] *?
+	 *     			 http://<hostname>:8080/api/messages?search=dolor dapibus gravida
+	 *  
+	 *  will get back with response as :
+	 *  
+	 * 	"[{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc ac","id":104,"person":{"id":1,"name":"Rigel Young"}}]"
 	 * 
 	 * @param currentUser
 	 * @param searchFilter
@@ -57,7 +59,7 @@ public class Controller {
 	@RequestMapping(value = "/api/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Tweet>> getMessages(@AuthenticationPrincipal UserDetails currentUser,
 			@RequestParam(value = "search", required = false) String searchFilter) {
-
+		
 		List<Tweet> tweets = dbServices.readTweets(currentUser.getUsername(), searchFilter);
 		return new ResponseEntity<>(tweets, HttpStatus.OK);
 	}
@@ -71,7 +73,7 @@ public class Controller {
 	 * @return
 	 */
 	@RequestMapping(value = "/api/followers_and_following", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<Person>> getListOfPeopleUserFollows(@AuthenticationPrincipal UserDetails currentUser) {
+	public ResponseEntity<List<Person>> retriveFollowingAndFollower(@AuthenticationPrincipal UserDetails currentUser) {
 
 		List<Person> users = dbServices.getFollowingAndFollower(currentUser.getUsername());
 		return new ResponseEntity<>(users, HttpStatus.OK);
@@ -79,8 +81,13 @@ public class Controller {
 	}
 
 	/**
-	 * @PUT : Idempotent
+	 * @PUT : Idempotent 
+	 * @RequestParam(params = {
+	 * 		@Param(name = "id", description = "id of person to be followed by current person"),
+	 *	}
 	 * 
+	 * 	eg:  PUT: follow USAGE http://<HOST:PORT>/api/user/follow {"id" : "7" , <other optional details>}
+	 *  
 	 * @param id
 	 * @param currentUser
 	 * @return
@@ -89,30 +96,37 @@ public class Controller {
 	public ResponseEntity<Boolean> follow(@RequestBody String id, @AuthenticationPrincipal UserDetails currentUser) {
 
 		boolean sucess = false;
-		sucess = dbServices.follow(getId(id), currentUser.getUsername());
+		int personToFollow = getId(id);
+		if(!dbServices.isValidPerson(personToFollow))
+			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
+		
+		sucess = dbServices.follow(personToFollow, currentUser.getUsername());
 		return new ResponseEntity<Boolean>(sucess, HttpStatus.CREATED);
 	}
 
 	/**
 	 * @DELETE
-	 * 
-	 * 
-	 * 
+	 * Usage : http://<HOST:PORT>/api/follower/unfollow/1 and Body as {  "id": "1", ....}
 	 * @param currentUser
 	 * @return
 	 */
 	@RequestMapping(value = "/api/follower/unfollow/{id}", method = RequestMethod.DELETE, consumes = MediaType.ALL_VALUE)
 	public ResponseEntity<Boolean> unfollowByID(@AuthenticationPrincipal UserDetails currentUser,
-			@PathVariable("id") String id) {
-
-		dbServices.unfollow(Integer.parseInt(id), currentUser.getUsername());
+			@PathVariable("id") int id) {
+       
+		 if(!dbServices.isValidPerson(id))
+			 return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
+		 
+		dbServices.unfollow(id, currentUser.getUsername());
 		return new ResponseEntity<Boolean>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
 	 * @GET
 	 * 
+	 * 	 userId is ID (int)
 	 * 
+	 * USAGE : http://<HOST:PORT>/api/shortest_distance_to/10 
 	 * 
 	 * @param source
 	 * @param destination
@@ -120,15 +134,19 @@ public class Controller {
 	 */
 	@RequestMapping(value = "/api/shortest_distance_to/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> getShortestDistance(@AuthenticationPrincipal UserDetails source,
-			@PathVariable("userId") String destination) {
+			@PathVariable("userId") int destination) {
+		
+		if(!dbServices.isValidPerson(destination) )
+			return new ResponseEntity<Integer> (HttpStatus.BAD_REQUEST);
 
-		int distance = dbServices.getDistance(source.getUsername(), Integer.valueOf(destination));
+		int distance = dbServices.getDistance(source.getUsername(),destination);
+		
 		return new ResponseEntity<>(distance, HttpStatus.OK);
 	}
 
 	private int getId(String id) {
 		JSONObject json = new JSONObject(id);
-		id = json.getString("id");
-		return Integer.parseInt(id);
+		//Spring keeps track of Bad Request
+		 return json.getInt("id");
 	}
 }
