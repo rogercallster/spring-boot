@@ -1,4 +1,4 @@
-package org.ws.web.db.services;
+package org.ws.web.db.data_services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import org.ws.web.model.Person;
 import org.ws.web.model.Tweet;
 
 /**
- * This class have all the services business logic
+ * This class have all the services business logic to help RESTful services complete all the required task
  * */
 
 @Service
@@ -21,15 +21,15 @@ public class DBServicesImplementation implements DBServices {
 	@Autowired
 	DAOImplementation dao;
 
+	
 	public DBServicesImplementation(final DAOImplementation dbo) {
 		this.dao = dbo;
 	}
 
 	/**
-	 * 
-	 * This method is responsible for getting all the tweet from current user and all the followers
-	 * 
-	 * 
+	 * @Description This method is responsible for getting all the tweets from current user and all the followers of
+	 *              current user
+	 *              [{message: {},Person : {}} , ...]
 	 * */
 
 	@Override
@@ -40,23 +40,27 @@ public class DBServicesImplementation implements DBServices {
 		return dao.getTweets(persons, keyword);
 
 	}
-
-	public Person getUserDetails(String username) {
-		return dao.getUser(username);
-	}
-
+	
+	
+	/**
+	 * @Description Method to find all the following and follower list from DB
+	 * */
 	@Override
 	public List<Person> getFollowingAndFollower(String user) {
+		
 		int id = getUserDetails(user).getId();
-		;
 		List<Person> list = dao.queryFollowAndFollowerRecords(id);
 		return list;
 	}
 
 	/**
-	 * this method finds shortest distance between source and destination.
+	 * @Description method "getShortestDistance" finds shortest distance between source(most probably current user) and
+	 *              destination.
+	 * 
+	 *              In case two nodes are not connected we return Integer.MAX_VALUE If dst node is not valid it should
+	 *              never reach here but in case it reaches here it will return Integer.MAX_VALUE
 	 * */
-	public int getDistance(String currentUser, int destination) {
+	public int getShortestDistance(String currentUser, int destination) {
 
 		int source = getUserDetails(currentUser).getId();
 
@@ -69,7 +73,7 @@ public class DBServicesImplementation implements DBServices {
 		// initialize iteration queue
 		List<Integer> queue = new ArrayList<>();
 
-		// add source to queue as first element to start iterate process over adjacency list
+		// add source to queue as first element to start iteration process over adjacency list
 		queue.add(source);
 		int currentNode = source;
 
@@ -83,16 +87,14 @@ public class DBServicesImplementation implements DBServices {
 			List<Integer> followingList = dao.getFollowing(currentNode);
 
 			for (int tempNextNode : followingList) {
-
+				// while node is first time iterated add create distance object and insert it in distance tracker
 				if (visitedDistance.get(tempNextNode) == null) {
 					visitedDistance.put(tempNextNode, visitedDistance.get(currentNode) + 1);
-					if (tempNextNode != source || tempNextNode != destination)
-						queue.add(tempNextNode);
-
+					updateQueue(destination, source, queue, tempNextNode);
+				// if distance of current node is less through current node update the distance
 				} else if (visitedDistance.get(tempNextNode) > visitedDistance.get(currentNode)+1) {
 					visitedDistance.put(tempNextNode, visitedDistance.get(currentNode) + 1);
-					if (tempNextNode != source || tempNextNode != destination)
-						queue.add(tempNextNode);
+					updateQueue(destination, source, queue, tempNextNode);
 				}
 			}
 
@@ -101,10 +103,12 @@ public class DBServicesImplementation implements DBServices {
 		return visitedDistance.get(destination) != null ? visitedDistance.get(destination) : Integer.MAX_VALUE;
 	}
 
-	public boolean isValidPerson(int dst) {
-		List<Person> list = dao.queryPerson(dst);
-		return list != null && list.size() == 1;
+	private void updateQueue(int destination, int source, List<Integer> queue, int tempNextNode) {
+		if (tempNextNode != source || tempNextNode != destination)
+			queue.add(tempNextNode);
 	}
+
+	
 
 	/**
 	 * Note: Needed two db query because http://localhost:8080/h2-console is no more working with 404 error.
@@ -118,12 +122,24 @@ public class DBServicesImplementation implements DBServices {
 		unfollow(userToBeFollowed, currentUser);
 		return dao.insert(userToBeFollowed, currentUserId);
 	}
-
+	
 	@Override
 	public boolean unfollow(int userId, String currentUser) {
 		int id = getUserDetails(currentUser).getId();
 		return dao.delete(userId, id);
 
 	}
+	
+	@Override
+	public boolean isValidPerson(int dst) {
+		List<Person> list = dao.queryPerson(dst);
+		return list != null && list.size() == 1;
+	}
+	
+	private Person getUserDetails(String username) {
+		return dao.getUser(username);
+	}
+	
+	
 
 }

@@ -15,29 +15,73 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.ws.web.db.services.DBServicesImplementation;
+import org.ws.web.db.data_services.DBServicesImplementation;
 import org.ws.web.model.Person;
 import org.ws.web.model.Tweet;
 
 /**
- * Usage and notes:
  * 
- * All user have username as : FirstName+Space+LastName e.g. "Rigel Young" and password = "123" -Basic auth details in
- * SecurityConfiuration class.
+ * @ProblemStatement Title: Mini Twitter Coding Challenge
+ * 
+ *                   Create the backend for a mini messaging service, inspired by Twitter. It should have a RESTful API
+ *                   where all endpoints require HTTP Basic authentication and generate output in JSON format. Implement
+ *                   the the following basic functionality:
+ * 
+ *                   1 An endpoint to read the message list for the current user (as identified by their HTTP Basic
+ *                   authentication credentials). Include messages they have sent and messages sent by users they
+ *                   follow. Support a “search=” parameter that can be used to further filter messages based on keyword.
+ * 
+ *                   2 Endpoints to get the list of people the user is following as well as the followers of the user.
+ * 
+ *                   3 An endpoint to start following another user.
+ * 
+ *                   4 An endpoint to unfollow another user.
+ * 
+ *                   5 An endpoint that returns the current user's "shortest distance" to some other user. The shortest
+ *                   distance is defined as the number of hops needed to reach a user through the users you are
+ *                   following (not through your followers; direction matters). For example, if you follow user B, your
+ *                   shortest distance to B is 1. If you do not follow user B, but you do follow user C who follows user
+ *                   B, your shortest distance to B is 2.
  * 
  * 
- * This Controller have following rest services
+ * @Notes:
  * 
- * GET:
+ *         a) Credentials : All user have username as : FirstName+Space+LastName e.g. "Rigel Young" and password = "123"
+ *         -Basic auth implementation is in SecurityConfiuration class.
  * 
- * 1) getMessages USAGE http://<HOST:PORT>/api/messages?<search = keyword> 2) getListOfPeopleUserFollows USAGE
- * http://<HOST:PORT>/api/followers_and_following 5) getShortestDistance USAGE
- * http://<HOST:PORT>/api/shortest_distance_to/{user}
+ *         b) No support for Pagination as question did not have any details or requirement for it.
  * 
- * PUT: follow USAGE http://<HOST:PORT>/api/user/follow {"id" : "7" , <other optional details>}
+ *         c) Exception handling safety nets dependent on core platform exception handling
  * 
- * DELETE: un-follow USAGE http://<HOST:PORT>/api/follower/unfollow/{id}
+ *         d) Couple of messages do have Bad argument exception but I have not tried to Implement any Message/Error
+ *         handling as might be a stretch task.
  * 
+ *         e) Further enhancement will include but not limited to. : 1) Exception Handling & Implementation of Http
+ *         error message if required. 2) DB layer abstraction to optimizing on query without affecting DAO object. 3)
+ *         Pagination Support. 4) Other filter support based on requirements. 5) Implementing Hypertext As The Engine Of
+ *         Application State by adding links and hrefs to JSON object. 6) Optimize Maturity model specially Http status
+ *         code and HATEOAS
+ * 
+ * 
+ * 
+ *         Methods list:
+ * 
+ * @GET:
+ * 
+ *       1) retriveMessages 
+ *       		@USAGE http://<HOST:PORT>/api/user/messages?<search = keyword>
+ *       2) retriveFollowingAndFollower
+ *       		@USAGE http://<HOST:PORT>/api/user/followers_and_following 
+ *       3) getShortestDistance
+ *       		@USAGE http://<HOST:PORT>/api/user/shortest_distance/{user}
+ * 
+ * @PUT: follow @USAGE http://<HOST:PORT>/api/user/follow with body as: {"id" : "7"}
+ * 
+ * @DELETE: unfollow 
+ * 				@USAGE http://<HOST:PORT>/api/user/follow/{id}
+ * 
+ * 
+ * @author ankursar AT buffalo DOT edu
  * */
 
 @RestController
@@ -49,20 +93,21 @@ public class Controller {
 	/**
 	 * @GET
 	 * 
-	 *      USAGE http://<HOST:PORT>/api/messages?<search = keyword> e.g.
-	 *      http://<hostname>:8080/api/messages?search=dolor dapibus gravida
+	 * @USAGE http://<HOST:PORT>/api/user/messages?<search = keyword> e.g.
+	 *        http://<hostname>:8080/api/user/messages?search=dolor dapibus gravida
 	 * 
-	 *      should get :
+	 *        should get :
 	 * 
-	 *      "[{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc ac","id":104,"person":{"id":1,"name":"Rigel Young"}}]"
+	 *        "[{"message":"ac sem ut dolor dapibus gravida. Aliquam tincidunt, nunc
+	 *        ac","id":104,"person":{"id":1,"name":"Rigel Young"}}]"
 	 * 
 	 * @param currentUser
 	 * @param searchFilter
 	 * @return
 	 */
 
-	@RequestMapping(value = "/api/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<Tweet>> getMessages(@AuthenticationPrincipal UserDetails currentUser,
+	@RequestMapping(value = "/api/user/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<Tweet>> retriveMessages(@AuthenticationPrincipal UserDetails currentUser,
 			@RequestParam(value = "search", required = false) String searchFilter) {
 
 		List<Tweet> tweets = dbServices.readTweets(currentUser.getUsername(), searchFilter);
@@ -72,12 +117,12 @@ public class Controller {
 	/**
 	 * @GET
 	 * 
-	 *      USAGE : http://<HOST:PORT>/api/followers_and_following
+	 * @USAGE : http://<HOST:PORT>/api/followers_and_following
 	 * 
 	 * @param currentUser
 	 * @return
 	 */
-	@RequestMapping(value = "/api/followers_and_following", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/api/user/followers_and_following", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Person>> retriveFollowingAndFollower(@AuthenticationPrincipal UserDetails currentUser) {
 
 		List<Person> users = dbServices.getFollowingAndFollower(currentUser.getUsername());
@@ -90,8 +135,7 @@ public class Controller {
 	 * @RequestParam(params = {
 	 * @Param(name = "id", description = "id of person to be followed by current person"), }
 	 * 
-	 *             USAGE: PUT: follow USAGE http://<HOST:PORT>/api/user/follow and Body = {"id" : "7" , <other optional
-	 *             details>}
+	 * @USAGE: PUT: follow @USAGE http://<HOST:PORT>/api/user/follow and Body = {"id" : "7" , <other optional details>}
 	 * 
 	 * @param id
 	 * @param currentUser
@@ -112,14 +156,13 @@ public class Controller {
 	/**
 	 * @DELETE
 	 * 
-	 *         Usage : http://<HOST:PORT>/api/follower/unfollow/1
+	 * @USAGE : http://<HOST:PORT>/api/user/follow/1
 	 * 
 	 * @param currentUser
 	 * @return
 	 */
-	@RequestMapping(value = "/api/follower/unfollow/{id}", method = RequestMethod.DELETE, consumes = MediaType.ALL_VALUE)
-	public ResponseEntity<Boolean> unfollowByID(@AuthenticationPrincipal UserDetails currentUser,
-			@PathVariable("id") int id) {
+	@RequestMapping(value = "/api/user/follow/{id}", method = RequestMethod.DELETE, consumes = MediaType.ALL_VALUE)
+	public ResponseEntity<Boolean> unfollow(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") int id) {
 
 		if (!dbServices.isValidPerson(id))
 			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
@@ -133,20 +176,20 @@ public class Controller {
 	 * 
 	 *      userId is ID (int)
 	 * 
-	 *      USAGE : http://<HOST:PORT>/api/shortest_distance_to/10
+	 * @USAGE : http://<HOST:PORT>/api/user/shortest_distance_to/10
 	 * 
 	 * @param source
 	 * @param destination
 	 * @return
 	 */
-	@RequestMapping(value = "/api/shortest_distance_to/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/api/user/shortest_distance/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> getShortestDistance(@AuthenticationPrincipal UserDetails source,
 			@PathVariable("userId") int destination) {
 
 		if (!dbServices.isValidPerson(destination))
 			return new ResponseEntity<Integer>(HttpStatus.BAD_REQUEST);
 
-		int distance = dbServices.getDistance(source.getUsername(), destination);
+		int distance = dbServices.getShortestDistance(source.getUsername(), destination);
 
 		return new ResponseEntity<>(distance, HttpStatus.OK);
 	}

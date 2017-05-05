@@ -13,10 +13,13 @@ import org.ws.web.db.services.authentication.AuthenticationService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+	
 	private static final String H2_CONSOLE = "/h2-console/*";
 	private static final String LOGIN = "/login";
+	
 	@Autowired
 	Environment env;
+	
 	@Autowired
 	AuthenticationService authenticationService;
 
@@ -25,8 +28,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().anyRequest().fullyAuthenticated();
 		http.httpBasic();
 		http.csrf().disable();
-		http.authorizeRequests().antMatchers(H2_CONSOLE).permitAll().anyRequest().authenticated().and()
-				.formLogin().loginPage(LOGIN).permitAll().and().logout().permitAll();
+		http.authorizeRequests().antMatchers(H2_CONSOLE).permitAll().anyRequest().authenticated().and().formLogin()
+				.loginPage(LOGIN).permitAll().and().logout().permitAll();
 		http.headers().frameOptions().disable();
 	}
 

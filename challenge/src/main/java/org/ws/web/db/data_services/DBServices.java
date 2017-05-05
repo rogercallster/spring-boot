@@ -1,4 +1,4 @@
-package org.ws.web.db.services;
+package org.ws.web.db.data_services;
 
 import java.util.List;
 
@@ -14,5 +14,7 @@ public interface DBServices {
 	public boolean follow(int userToBeFollowed, String currentUser);
 
 	public List<Tweet> readTweets(String currentUser, String keyword);
+
+	public boolean isValidPerson(int dst);
 
 }
